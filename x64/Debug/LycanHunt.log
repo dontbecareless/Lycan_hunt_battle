@@ -1,0 +1,25 @@
+﻿  source.cpp
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: __cdecl sf::String::String(wchar_t const *)" (??0String@sf@@QEAA@PEB_W@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: __cdecl sf::VideoMode::VideoMode(unsigned int,unsigned int,unsigned int)" (??0VideoMode@sf@@QEAA@III@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: bool __cdecl sf::WindowBase::isOpen(void)const " (?isOpen@WindowBase@sf@@QEBA_NXZ) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: bool __cdecl sf::WindowBase::pollEvent(class sf::Event &)" (?pollEvent@WindowBase@sf@@QEAA_NAEAVEvent@2@@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: virtual void __cdecl sf::Window::close(void)" (?close@Window@sf@@UEAAXXZ) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::Window::setVerticalSyncEnabled(bool)" (?setVerticalSyncEnabled@Window@sf@@QEAAX_N@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::Window::display(void)" (?display@Window@sf@@QEAAXXZ) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::Transformable::setPosition(float,float)" (?setPosition@Transformable@sf@@QEAAXMM@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: virtual __cdecl sf::Shape::~Shape(void)" (??1Shape@sf@@UEAA@XZ) в функции "public: virtual __cdecl sf::CircleShape::~CircleShape(void)" (??1CircleShape@sf@@UEAA@XZ).
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::Shape::setFillColor(class sf::Color const &)" (?setFillColor@Shape@sf@@QEAAXAEBVColor@2@@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: __cdecl sf::CircleShape::CircleShape(float,unsigned __int64)" (??0CircleShape@sf@@QEAA@M_K@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::RenderTarget::clear(class sf::Color const &)" (?clear@RenderTarget@sf@@QEAAXAEBVColor@2@@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl sf::RenderTarget::draw(class sf::Drawable const &,class sf::RenderStates const &)" (?draw@RenderTarget@sf@@QEAAXAEBVDrawable@2@AEBVRenderStates@2@@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: __cdecl sf::RenderWindow::RenderWindow(class sf::VideoMode,class sf::String const &,unsigned int,struct sf::ContextSettings const &)" (??0RenderWindow@sf@@QEAA@VVideoMode@1@AEBVString@1@IAEBUContextSettings@1@@Z) в функции main.
+source.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: virtual __cdecl sf::RenderWindow::~RenderWindow(void)" (??1RenderWindow@sf@@UEAA@XZ) в функции main.
+source.obj : error LNK2001: неразрешенный внешний символ "public: static class sf::RenderStates const sf::RenderStates::Default" (?Default@RenderStates@sf@@2V12@B).
+source.obj : error LNK2001: неразрешенный внешний символ "public: static class sf::Color const sf::Color::Blue" (?Blue@Color@sf@@2V12@B).
+source.obj : error LNK2001: неразрешенный внешний символ "public: static class sf::Color const sf::Color::Magenta" (?Magenta@Color@sf@@2V12@B).
+C:\Users\tima_\Documents\SFML-2.6.1\lib\sfml-graphics-d.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+C:\Users\tima_\Documents\SFML-2.6.1\lib\sfml-window-d.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+C:\Users\tima_\Documents\SFML-2.6.1\lib\sfml-audio-d.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+C:\Users\tima_\Documents\SFML-2.6.1\lib\sfml-system-d.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+C:\Users\tima_\Documents\SFML-2.6.1\lib\sfml-network-d.lib : warning LNK4272: тип компьютера библиотеки "x86" конфликтует с типом целевого компьютера "x64"
+D:\exception\VS\LycanHunt\x64\Debug\LycanHunt.exe : fatal error LNK1120: неразрешенных внешних элементов: 18

@@ -1,0 +1,110 @@
+﻿  source.cpp
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(144,22): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(144,17): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(151,22): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(151,17): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(157,22): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(157,17): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(164,22): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(164,17): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(224,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(229,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(237,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(316,17): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(317,17): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(332,23): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(332,12): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(341,18): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(342,18): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(367,24): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(367,13): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:             T=int
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         and
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,85): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:             T=int
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         and
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(390,61): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:             T=int
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         and
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,85): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244: аргумент: преобразование "T" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:             T=int
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         and
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(393,61): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(455,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(467,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(469,23): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(488,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(507,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(531,46): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(532,46): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,34): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,34): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,34): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,34): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,34): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,23): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,23): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,23): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,23): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(539,23): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,50): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,50): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,50): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,50): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,50): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,35): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,35): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,35): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,35): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(540,35): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(544,22): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(544,11): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,49): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,49): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,49): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,49): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,49): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,39): warning C4244: аргумент: преобразование "int" в "T", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,39): warning C4244:         with
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,39): warning C4244:         [
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,39): warning C4244:             T=float
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(554,39): warning C4244:         ]
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(584,24): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(589,24): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(607,19): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(607,48): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(614,24): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(614,53): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(619,22): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(619,51): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(700,20): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(915,11): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(1224,20): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(1224,14): warning C4305: аргумент: усечение из "double" в "float"
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(1320,21): warning C4018: <: несоответствие типов со знаком и без знака
+D:\exception\VS\LycanHunt\LycanHunt\source.cpp(1323,21): warning C4018: <: несоответствие типов со знаком и без знака
+  LycanHunt.vcxproj -> D:\exception\VS\LycanHunt\Debug\LycanHunt.exe
