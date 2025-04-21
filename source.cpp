@@ -27,6 +27,9 @@ bool nowBotTurn = false;
 const int w = 11;
 const int h = 6;
 vector<vector<string>> battlefieldState(h, vector<string>(w, "free"));
+vector<Sprite> turnTracker;
+vector<RectangleShape> turnTrackerWindows;
+vector<bool> trackerFriends;
 
 
 struct Unit;
@@ -140,39 +143,27 @@ public:
 	void setType(string& dano) {
 		type = dano;
 		if (type == "enemyArcher") {
-			txtt = textures["enemyArcher"];
-			txt.setScale(0.9, 0.9);
+			txtt = textures["enemyArcher"];	
 			battlefieldState[positiony][positionx] = "enemy";
-			txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
-			return;
 		}
-		if (type == "enemyWizard") {
+		else if (type == "enemyWizard") {
 			txtt = textures["enemyWizard"];
-			txt.setScale(0.9, 0.9);
 			battlefieldState[positiony][positionx] = "enemy";
-			txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
-			return;
-		}if (type == "enemyWarrior") {
+		}
+		else if (type == "enemyWarrior") {
 			txtt = textures["enemyWarrior"];
-			txt.setScale(0.9, 0.9);
 			battlefieldState[positiony][positionx] = "enemy";
-			txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
-			return;
 		}
-		if (type == "we") {
+		else if (type == "we") {
 			txtt = textures["we"];
-			txt.setScale(0.9, 0.9);
 			battlefieldState[positiony][positionx] = "friend";
-			txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
-			return;
 		}
-		if (type == "dog") {
+		else if (type == "dog") {
 			txtt = textures["dog"];
-			txt.setScale(0.75, 0.75);
 			battlefieldState[positiony][positionx] = "friend";
-			txt.move(positionx * 150.f + 45.f, positiony * 150.f - 50.f);
-			return;
 		}
+		txt.setScale(0.9, 0.9);
+		txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
 	}
 	vector<int> Status_duration;//-1, если статуса нет, иначе рил длительность, i - id
 	Unit() {
@@ -1121,6 +1112,62 @@ void giveStats(Unit& target, string& inf) {
 	}
 	
 }
+void coloriseAsistance(vector<vector<RectangleShape>>& battlefield) {
+	int us_count = 0;
+	int they_count = 0;
+	for (size_t i = 0; i < turnTrackerWindows.size(); i++) {
+		if (trackerFriends[i]) {
+			if (contMouse(turnTrackerWindows[i]) && us[us_count].alive) {
+				battlefield[us[us_count].positiony][us[us_count].positionx].setFillColor(Color(255, 0, 0, 100));
+			}
+			if (!nowBotTurn && us_count == select) {
+				turnTrackerWindows[i].setFillColor(Color::Red);
+			} else {
+				turnTrackerWindows[i].setFillColor(Color::Blue);
+			}
+			us_count++;
+		} else {
+			if (contMouse(turnTrackerWindows[i]) && they[they_count].alive) {
+				battlefield[they[they_count].positiony][they[they_count].positionx].setFillColor(Color(255, 0, 0, 100));
+			}
+			if (nowBotTurn && they_count == select) {
+				turnTrackerWindows[i].setFillColor(Color::Red);
+			}
+			else {
+				turnTrackerWindows[i].setFillColor(Color::Blue);
+			}
+			they_count++;
+		}
+	}
+}
+void buildTurnTracker(int pointer_us, int pointer_they) {
+	while (pointer_us < us.size() || pointer_they < they.size()) {
+		turnTracker.push_back(Sprite());
+		turnTrackerWindows.push_back(RectangleShape());
+		turnTrackerWindows.back().setOutlineThickness(5);
+		turnTrackerWindows.back().setOutlineColor(Color::Blue);
+		turnTrackerWindows.back().setFillColor(Color::Blue);
+		turnTrackerWindows.back().setSize(Vector2f(75.f, 75.f));
+		chooseSelect(pointer_us, pointer_they);
+		if (nowBotTurn) {
+			turnTracker.back().setTexture(they[select].txtt);
+			trackerFriends.push_back(false);
+		}
+		else {
+			turnTracker.back().setTexture(us[select].txtt);
+			trackerFriends.push_back(true);
+		}
+		select = -1;
+		turnTracker.back().setScale(0.5, 0.5);
+	}
+	for (size_t i = 0; i < turnTracker.size();i++) {
+		int minBreak = (1920 - (75 * int(turnTracker.size()))) / 2 - 40;
+		Vector2f pos(minBreak + i * 90, 950.f);
+		turnTracker[i].setPosition(pos);
+		turnTrackerWindows[i].setPosition(pos);
+	}
+}
+
 
 int main()
 {
@@ -1158,6 +1205,13 @@ int main()
 	if (!textures["active"].loadFromFile("imgs/activeTexture.png") || !textures["skipTurn"].loadFromFile("imgs/skipTurnTexture.png")) {
 		return EXIT_FAILURE;
 	}
+
+
+
+	Font main_font;
+	if (!main_font.loadFromFile("mainFont.ttf")) return EXIT_FAILURE;
+
+	//отдельной структурой таблицу статов
 	Sprite skipTurnButton;
 	skipTurnButton.setTexture(textures["skipTurn"]);
 	skipTurnButton.setPosition(Vector2f(7.f, 925.f));
@@ -1279,6 +1333,8 @@ int main()
 	int pointer_they = 0;
 	int pointer_us = 0;
 
+	buildTurnTracker(pointer_us, pointer_they);
+
 	while (window.isOpen())
 	{
 		Event event;
@@ -1314,6 +1370,7 @@ int main()
 		window.draw(bg);
 		for (int i = 0; i < h; i++) {
 			for (int j = 0; j < w; j++) {
+				coloriseAsistance(battlefield);
 				window.draw(battlefield[i][j]);
 			}
 		}
@@ -1333,6 +1390,10 @@ int main()
 			else {
 				window.draw(they[select].bullet.txt);
 			}
+		}
+		for (size_t i = 0; i < turnTracker.size(); i++) {
+			window.draw(turnTrackerWindows[i]);
+			window.draw(turnTracker[i]);
 		}
 		window.draw(skipTurnButton);
 		window.display();
