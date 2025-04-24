@@ -13,7 +13,7 @@ using namespace sf;
 using namespace std;
 
 
-enum class PGS { free, active_ability, animation, damage, particle_flying, activating_active, dealing_damage };
+enum class PGS { free, active_ability, animation, damage, particle_flying, activating_active, dealing_damage, activating_Altactive, Altactive_ability };
 //PGS = Possible Global States, but i am too lazy to write it every time
 
 map<string, Texture> textures;
@@ -51,6 +51,7 @@ struct StatBlock {
 };
 
 struct Passive {
+	string name;
 	int id;
 	string type;
 	int time;
@@ -83,6 +84,7 @@ vector<Passive> statuses;
 
 struct ActiveAbility;
 struct Particle {
+	string name;
 	RectangleShape txt;
 	int startSize;
 	int endSize;
@@ -101,6 +103,9 @@ struct Particle {
 };
 
 struct Unit {
+	int fireballNumber;
+	int healNumber;
+	int altActive;
 	bool isRangeUnit = false;
 	int attackRange;
 	Particle bullet;
@@ -124,11 +129,14 @@ struct Unit {
 	bool hasUnappliedStatus = false;
 	Sprite txt;
 	int defaultActiveCooldown;
+	int defaultAltActiveCooldown;
 	int iters;
 	int stepMoveX;
 	int stepMoveY;
 	int cooldown;
+	int altCooldown;
 	Sprite activeButton;
+	Sprite altActiveButton;
 	vector<Passive> statuses = {};
 	vector<Passive> passives_whenTurnStart_base = {};
 	vector<Passive> passives_whenTurnStart = {};
@@ -167,25 +175,35 @@ public:
 	}
 	vector<int> Status_duration;//-1, если статуса нет, иначе рил длительность, i - id
 	Unit() {
+		fireballNumber = 0;
+		healNumber = 0;
 		attackRange = -1;
 		isRangeUnit = false;
 		skippedTurnThisRound = false;
-		activeButton.setPosition(Vector2f(1615.f, 925.f));
+		activeButton.setPosition(Vector2f(1605.f, 925.f));
+		altActiveButton.setPosition(Vector2f(1770.f, 925.f));
 		Status_duration = { -1,-1,-1,-1, -1, -1 };
 		hasActive = false;
 		active = -1;
+		altActive = -1;
 		defaultActiveCooldown = -1;
+		defaultAltActiveCooldown = -1;
 		cooldown = 0;
 	}
 	Unit(int hpn, int msn, int dmgn, int posx, int posy, int ini) {
+		fireballNumber = 0;
+		healNumber = 0;
 		attackRange = -1;
 		isRangeUnit = false;
 		skippedTurnThisRound = false;
-		activeButton.setPosition(Vector2f(1615.f, 925.f));
+		activeButton.setPosition(Vector2f(1605.f, 925.f));
+		altActiveButton.setPosition(Vector2f(1770.f, 925.f));
 		Status_duration = { -1,-1,-1,-1, -1, -1 };
 		hasActive = false;
 		active = -1;
+		altActive = -1;
 		defaultActiveCooldown = -1;
+		defaultAltActiveCooldown = -1;
 		cooldown = 0;
 		hp = hpn;
 		ms = msn;
@@ -201,11 +219,13 @@ public:
 		attackRange = -1;
 		isRangeUnit = false;
 		skippedTurnThisRound = false;
-		activeButton.setPosition(Vector2f(1615.f, 925.f));
+		activeButton.setPosition(Vector2f(1605.f, 925.f));
+		altActiveButton.setPosition(Vector2f(1770.f, 925.f));
 		Status_duration = { -1,-1,-1,-1, -1, -1 };
 		hasActive = false;
 		active = -1;
 		defaultActiveCooldown = -1;
+		defaultAltActiveCooldown = -1;
 		cooldown = 0;
 		positionx = posx;
 		positiony = posy;
@@ -233,6 +253,9 @@ public:
 	}
 	void useActive() {
 		globalState = PGS::active_ability;
+	}
+	void useAltActive() {
+		globalState = PGS::Altactive_ability;
 	}
 	void takedmg(int tika) {
 		hp -= tika;
@@ -274,10 +297,10 @@ public:
 				txt.setColor(Color(0, 100, 0, 255));
 			}
 			wind.draw(txt);
-			if (hasActive && globalState == PGS::free && !nowBotTurn && select != -1) {
+			if (hasActive && globalState == PGS::free && !nowBotTurn && select != -1 && fireballNumber > 0) {
 				if (cooldown == 0) {
 					activeButton.setColor(Color::White);
-					activeButton.setTexture(textures["active"]);
+					activeButton.setTexture(textures["fireballButton"]);
 				}
 				else {
 					activeButton.setColor(Color::Black);
@@ -285,8 +308,19 @@ public:
 				wind.draw(activeButton);
 			}
 			if (hasActive && globalState == PGS::active_ability) {
-				activeButton.setTexture(textures["active"]);
+				activeButton.setTexture(textures["fireballButton"]);
+				altActiveButton.setTexture(textures["healButton"]);
 				wind.draw(activeButton);
+			}
+			if (hasActive && globalState == PGS::free && !nowBotTurn && select != -1 && healNumber > 0) {
+				if (altCooldown == 0) {
+					altActiveButton.setColor(Color::White);
+					altActiveButton.setTexture(textures["healButton"]);
+				}
+				else {
+					altActiveButton.setColor(Color::Black);
+				}
+				wind.draw(altActiveButton);
 			}
 		}
 	}
@@ -376,6 +410,9 @@ public:
 		}
 	}
 };
+Vector2f sumOfVectors2f(const Vector2f& a, const Vector2f& b) {
+	return Vector2f(a.x + b.x, a.y + b.y);
+}
 
 bool contMouse(RectangleShape& rect) {
 	return rect.getGlobalBounds().contains(Mouse::getPosition().x, Mouse::getPosition().y);
@@ -547,6 +584,7 @@ void Particle::draw(bool isActive) {
 
 
 struct ActiveAbility {
+	string name;
 	Particle txt;
 	int id;
 	int range;
@@ -569,7 +607,10 @@ struct ActiveAbility {
 		nowtargety = targety;
 	}
 	void activate(Unit& owner) {
-		if (target == "earth") {
+		if (target == "self") {
+			us[select].takedmg(hpChange, isBarrier);
+		}
+		else if (target == "earth") {
 			for (int y = max(0, nowtargety - area); y < min(h, nowtargety + area); y++) {
 				for (int x = max(0, nowtargetx - area); x < min(w, nowtargetx + area); x++) {
 					for (int i = 0; i < they.size(); i++) {
@@ -584,15 +625,97 @@ struct ActiveAbility {
 					}
 				}
 			}
-			nowtargetx = -1;
-			nowtargety = -1;
-			select = -1;
-			globalState = PGS::free;
+
 		}
+		nowtargetx = -1;
+		nowtargety = -1;
+		select = -1;
+		globalState = PGS::free;
 	}
 };
 
 vector<ActiveAbility> actives;
+
+struct StatsTable {
+	RectangleShape bg;
+	Text hp;
+	Text ms;
+	Text dmg;
+	Text ini;
+	Text active;
+	Text passive;
+	StatsTable(Font& font) {
+		hp.setFont(font);
+		ms.setFont(font);
+		dmg.setFont(font);
+		ini.setFont(font);
+		active.setFont(font);
+		passive.setFont(font);
+		bg.setFillColor(Color::Blue);
+		bg.setSize(Vector2f(750.f, 300.f));
+		bg.setOutlineColor(Color::White);
+		bg.setOutlineThickness(5);
+	}
+	void setContent(Unit& dano) {
+		hp.setString("HP: " + to_string(dano.hp) + "/" + to_string(dano.hpMax));
+		ms.setString("Movespeed: " + to_string(dano.ms));
+		dmg.setString("Damage: " + to_string(dano.dmg));
+		ini.setString("Initiative: " + to_string(dano.initiative));
+		if (dano.hasActive) {
+			string activeString = "";
+			activeString += "Active: " + actives[dano.active].name + " (" + to_string(dano.fireballNumber) + ")";
+			if (dano.altActive != -1) {
+				activeString += ", " + actives[dano.altActive].name + " (" + to_string(dano.healNumber) + "), ";
+			}
+			active.setString(activeString);
+		}
+		else {
+			active.setString("Active: none");
+		}
+		string passiveString = "";
+		for (size_t i = 0; i < dano.passives_whenAttack.size(); i++) {
+			if (passiveString != "") {
+				passiveString += ", ";
+			}
+			passiveString += dano.passives_whenAttack[i].name;
+		}
+		for (size_t i = 0; i < dano.passives_whenTurnStart.size(); i++) {
+			if (passiveString != "") {
+				passiveString += ", ";
+			}
+			passiveString += dano.passives_whenTurnStart[i].name;
+		}
+		if (passiveString == "") {
+			passive.setString("Passives: none");
+		}
+		else {
+			passive.setString("Passives: " + passiveString);
+		}
+	}
+	void draw(Unit& dano, RenderWindow& window) {
+		this->setContent(dano);
+		int xsign = Mouse::getPosition().x > 960 ? -1 : 0;
+		int ysign = Mouse::getPosition().y > 540 ? -1 : 0;
+
+		bg.setPosition(Vector2f(Mouse::getPosition().x + 750 * xsign, Mouse::getPosition().y + 300 * ysign));
+		hp.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 5)));
+		ms.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 50)));
+		dmg.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 95)));
+		ini.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 140)));
+		passive.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 185)));
+		active.setPosition(sumOfVectors2f(bg.getPosition(), Vector2f(5, 230)));
+
+		window.draw(bg);
+		window.draw(hp);
+		window.draw(ms);
+		window.draw(dmg);
+		window.draw(ini);
+		window.draw(passive);
+		window.draw(active);
+
+	}
+};
+
 
 void chooseSelect(int& pointer_us, int& pointer_they) {
 	if (pointer_they >= they.size() && pointer_us >= us.size()) {
@@ -652,7 +775,10 @@ bool moveCondition(vector<vector<RectangleShape>>& battlefield, int i, int j) {
 	return contMouse(battlefield[i][j]) && pythagor(i - us[select].positiony, j - us[select].positionx) <= sqr(us[select].ms) && battlefieldState[i][j] == "free";
 }
 bool activeCondition() {
-	return us[select].hasActive && contMouse(us[select].activeButton) && us[select].cooldown == 0;
+	return us[select].hasActive && contMouse(us[select].activeButton) && us[select].cooldown == 0 && us[select].fireballNumber > 0;
+}
+bool altActiveCondition() {
+	return us[select].hasActive && contMouse(us[select].altActiveButton) && us[select].altCooldown == 0 && us[select].healNumber > 0;
 }
 bool weCanInteract(Clock& rattle) {
 	return globalState == PGS::free && select != -1 && rattle.getElapsedTime().asMilliseconds() >= 500 && Mouse::isButtonPressed(Mouse::Left);
@@ -718,6 +844,15 @@ void usPossibleActions(Clock& rattle, vector<vector<RectangleShape>>& battlefiel
 		us[select].useActive();
 		paintDefaultBattlefield(battlefield);
 		us[select].cooldown = us[select].defaultActiveCooldown;
+		us[select].fireballNumber--;
+		rattle.restart();
+		return;
+	}
+	if (altActiveCondition()) {
+		us[select].useAltActive();
+		paintDefaultBattlefield(battlefield);
+		us[select].altCooldown = us[select].defaultAltActiveCooldown;
+		us[select].healNumber--;
 		rattle.restart();
 		return;
 	}
@@ -736,6 +871,9 @@ bool continueParticleAnimationCondition(Clock& rattle) {
 }
 bool activatingActiveCondition() {
 	return globalState == PGS::activating_active && nowtargetx != -1 && nowtargety != -1;
+}
+bool activatingAltActiveCondition() {
+	return globalState == PGS::activating_Altactive && nowtargetx != -1 && nowtargety != -1;
 }
 void paintActiveSight(vector<vector<RectangleShape>>& battlefield, int i, int j) {
 	battlefield[i][j].setFillColor(Color(255, 0, 0, 100));
@@ -1013,6 +1151,7 @@ void playerTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Spri
 		globalState = PGS::free;
 		rattle.restart();
 		us[select].cooldown = 0;
+		us[select].fireballNumber++;
 	}
 	if (continueParticleAnimationCondition(rattle)) {
 		actives[us[select].active].txt.draw(true);
@@ -1032,6 +1171,10 @@ void playerTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Spri
 				rattle.restart();
 			}
 		}
+	}
+	if (globalState == PGS::Altactive_ability) {
+		actives[us[select].altActive].activate(us[select]);
+		rattle.restart();
 	}
 	colouriseBattlefieldUs(battlefield);
 }
@@ -1076,7 +1219,12 @@ void giveStats(Unit& target, string& inf) {
 		bul.txt.setFillColor(Color::Red);
 		bul.startSize = 20;
 		bul.endSize = 20;
+		bul.deltaX = 0;
+		bul.deltaY = 0;
+		target.altActive = -1;
 		target.bullet = bul;
+		target.fireballNumber = 5;
+		target.healNumber = 0;
 		return;
 	}
 	if (inf == "enemyWarrior") {
@@ -1096,9 +1244,14 @@ void giveStats(Unit& target, string& inf) {
 		target.ms = 3;
 		target.hasActive = true;
 		target.active = 0;
+		target.altActive = 1;
 		target.defaultActiveCooldown = 3;
 		target.initiative = 10;
 		target.statuses = statuses;
+		target.fireballNumber = 5;
+		target.healNumber = 5;
+		target.altCooldown = 0;
+		target.defaultAltActiveCooldown = 1;
 		return;
 	}
 	if (inf == "dog") {
@@ -1184,6 +1337,8 @@ int main()
 
 	textures["background"] = Texture();
 	textures["we"] = Texture();
+	textures["healButton"] = Texture();
+	textures["fireballButton"] = Texture();
 	textures["weStep1"] = Texture();
 	textures["weStep2"] = Texture();
 	textures["dog"] = Texture();
@@ -1205,13 +1360,17 @@ int main()
 	if (!textures["active"].loadFromFile("imgs/activeTexture.png") || !textures["skipTurn"].loadFromFile("imgs/skipTurnTexture.png")) {
 		return EXIT_FAILURE;
 	}
+	if (!textures["healButton"].loadFromFile("imgs/healButton.png") || !textures["fireballButton"].loadFromFile("imgs/fireballButton.png")) {
+		return EXIT_FAILURE;
+	}
 
 
 
 	Font main_font;
 	if (!main_font.loadFromFile("mainFont.ttf")) return EXIT_FAILURE;
 
-	//отдельной структурой таблицу статов
+	StatsTable table(main_font);
+
 	Sprite skipTurnButton;
 	skipTurnButton.setTexture(textures["skipTurn"]);
 	skipTurnButton.setPosition(Vector2f(7.f, 925.f));
@@ -1223,7 +1382,15 @@ int main()
 	ballOfFire.endSize = 450;
 	ballOfFire.txt = RectangleShape();
 	ballOfFire.txt.setTexture(&textures["fireball"]);
+	ActiveAbility heal;
+	heal.name = "heal";
+	heal.id = 1;
+	heal.addedStatus = {};
+	heal.removedStatus = {};
+	heal.target = "self";
+	heal.hpChange = -5;
 	ActiveAbility fireball;
+	fireball.name = "Fireball";
 	fireball.txt = ballOfFire;
 	fireball.range = 5;
 	fireball.addedStatus = {};
@@ -1241,6 +1408,7 @@ int main()
 	poisoned.time = 3;
 	poisoned.friendStats = URPOISONED;
 	Passive poison_touch;
+	poison_touch.name = "Poison Touch";
 	poison_touch.id = 1;
 	poison_touch.trigger = "attack";
 	poison_touch.target = "attacked";
@@ -1255,6 +1423,7 @@ int main()
 	running.friendStats = runningStats;
 	runningStats.tickdmg = 0;
 	Passive runrunrun; ;
+	runrunrun.name = "Coward";
 	runrunrun.condition = isEnemyNear;
 	runrunrun.id = 3;
 	runrunrun.effects_friends.push_back(running);
@@ -1267,6 +1436,7 @@ int main()
 	statuses.push_back(running);
 	statuses.push_back(runrunrun);
 	actives.push_back(fireball);
+	actives.push_back(heal);
 
 	//srand(time(nullptr));//задаём сид для генерации случайных чисел (что это и почему это желательно сделать можно почитать на cppreferences)
 
@@ -1396,6 +1566,16 @@ int main()
 			window.draw(turnTracker[i]);
 		}
 		window.draw(skipTurnButton);
+		for (size_t i = 0; i < us.size(); i++) {
+			if (us[i].alive && contMouse(us[i].txt) && Mouse::isButtonPressed(Mouse::Right)) {
+				table.draw(us[i], window);
+			}
+		}
+		for (size_t i = 0; i < they.size(); i++) {
+			if (they[i].alive && contMouse(they[i].txt) && Mouse::isButtonPressed(Mouse::Right)) {
+				table.draw(they[i], window);
+			}
+		}
 		window.display();
 	}
 }
