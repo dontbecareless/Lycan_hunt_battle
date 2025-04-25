@@ -12,10 +12,10 @@
 using namespace sf;
 using namespace std;
 
-
-enum class PGS { free, active_ability, animation, damage, particle_flying, activating_active, dealing_damage, activating_Altactive, Altactive_ability };
+enum class PGS { free, active_ability, animation, damage, particle_flying, activating_active, dealing_damage, activating_Altactive, Altactive_ability, conceding };
 //PGS = Possible Global States, but i am too lazy to write it every time
 
+vector<int> answer(4);
 map<string, Texture> textures;
 PGS globalState = PGS::free;
 vector<pair<string, string>> allPassives = { {"poisoned","status"}, {"Poison touch", "attack"}, {"running", "status"}, {"runrunrun", "turn start"} };
@@ -24,6 +24,7 @@ int damaged = -1;
 int nowtargetx = -1;
 int nowtargety = -1;
 bool nowBotTurn = false;
+bool concede = false;
 const int w = 11;
 const int h = 6;
 vector<vector<string>> battlefieldState(h, vector<string>(w, "free"));
@@ -150,25 +151,12 @@ public:
 	}
 	void setType(string& dano) {
 		type = dano;
-		if (type == "enemyArcher") {
-			txtt = textures["enemyArcher"];	
-			battlefieldState[positiony][positionx] = "enemy";
-		}
-		else if (type == "enemyWizard") {
-			txtt = textures["enemyWizard"];
-			battlefieldState[positiony][positionx] = "enemy";
-		}
-		else if (type == "enemyWarrior") {
-			txtt = textures["enemyWarrior"];
-			battlefieldState[positiony][positionx] = "enemy";
-		}
-		else if (type == "we") {
-			txtt = textures["we"];
+		txtt = textures[dano];
+		if (type == "dog" || type == "we") {	
 			battlefieldState[positiony][positionx] = "friend";
 		}
-		else if (type == "dog") {
-			txtt = textures["dog"];
-			battlefieldState[positiony][positionx] = "friend";
+		else {
+			battlefieldState[positiony][positionx] = "enemy";
 		}
 		txt.setScale(0.9, 0.9);
 		txt.move(positionx * 150.f + 140.f, positiony * 150.f + 10.f);
@@ -716,6 +704,40 @@ struct StatsTable {
 	}
 };
 
+struct ConcedeMenu {
+	Sprite fight;
+	Sprite run;
+	RectangleShape bg;
+	Text question;
+	ConcedeMenu() {}
+	ConcedeMenu(Font& font) {
+		question.setFont(font);
+		question.setString("Are you really want to concede?");
+		question.setPosition(Vector2f(485.f, 447.f));
+		fight.setTexture(textures["noButton"]);
+		fight.setPosition(Vector2f(485.f, 482.f));
+		run.setTexture(textures["yesButton"]);
+		run.setPosition(Vector2f(1283.f, 482.f));
+		bg.setOutlineThickness(5);
+		bg.setOutlineColor(Color::White);
+		bg.setFillColor(Color::Blue);
+		bg.setSize(Vector2f(960.f, 195.f));
+		bg.setPosition(Vector2f(480.f, 442.f));
+	}
+	void draw(RenderWindow& window) {
+		window.draw(bg);
+		window.draw(question);
+		window.draw(fight);
+		window.draw(run);
+	}
+	bool playerRun() {
+		if (contMouse(run)) {
+			return true;
+		}
+		return false;
+	}
+};
+ConcedeMenu crossroads;
 
 void chooseSelect(int& pointer_us, int& pointer_they) {
 	if (pointer_they >= they.size() && pointer_us >= us.size()) {
@@ -807,12 +829,16 @@ void paintDefaultBattlefield(vector<vector<RectangleShape>>& battlefield) {
 bool skipTurnCondition(Sprite& skipTurnButton) {
 	return !us[select].skippedTurnThisRound && contMouse(skipTurnButton);
 }
-void usPossibleActions(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Sprite& skipTurnButton) {
+void usPossibleActions(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Sprite& skipTurnButton, Sprite& concedeButton) {
 	if (skipTurnCondition(skipTurnButton)) {
 		us[select].skippedTurnThisRound = true;
 		select = -1;
 		rattle.restart();
 		return;
+	}
+	if (contMouse(concedeButton)) {
+		globalState = PGS::conceding;
+		rattle.restart();
 	}
 	for (int i = 0; i < they.size(); i++) {
 		if (usAttackCondition(i, battlefield)) {
@@ -939,7 +965,24 @@ bool aiNeedToChoose() {
 bool aiCanUseActive() {
 	return they[select].hasActive && they[select].cooldown == 0;
 }
+void makeAnswer() {
+	for (int i = 0; i < 2; i++) {
+		if (us[i].alive) {
+			answer[i] = us[i].hp;
+		} else {
+			answer[i] = 0;
+		}
+	}
+	answer[2] = us[0].healNumber;
+	answer[3] = us[0].fireballNumber;
+}
 bool somebodyWin(RenderWindow& window) {
+	if (concede) {
+		makeAnswer();
+		answer.push_back(0);
+		//cout << "You just run from your problems....";
+		return true;
+	}
 	bool allEnemyAreDead = true;
 	bool allFriendsAreDead = true;
 	for (size_t i = 0; i < us.size(); i++) {
@@ -955,18 +998,21 @@ bool somebodyWin(RenderWindow& window) {
 		}
 	}
 	if (allEnemyAreDead && allFriendsAreDead) {
-		cout << "FRIENDSHIP WON!!!!1!";
-		window.close();
+		makeAnswer();
+		answer.push_back(2);
+		//cout << "FRIENDSHIP WON!!!!1!";
 		return true;
 	}
 	if (allEnemyAreDead) {
-		cout << "U WIN!!!!11!1!!!!";
-		window.close();
+		makeAnswer();
+		answer.push_back(1);
+		//cout << "U WIN!!!!11!1!!!!";
 		return true;
 	}
 	if (allFriendsAreDead) {
-		cout << "Unluchka, unluchka((((";
-		window.close();
+		makeAnswer();
+		answer.push_back(0);
+		//cout << "Unluchka, unluchka((((";
 		return true;
 	}
 	return false;
@@ -1132,12 +1178,27 @@ void botTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield) {
 	}
 	paintDefaultBattlefield(battlefield);
 }
-void playerTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Sprite& skipTurnButton) {
+bool playerChooseFaith(Clock& rattle) {
+	return Mouse::isButtonPressed(Mouse::Left) && rattle.getElapsedTime().asMilliseconds() > 500 && globalState == PGS::conceding;
+}
+bool playerConcede(Clock& rattle) {
+	rattle.restart();
+	return crossroads.playerRun();
+}
+void playerTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Sprite& skipTurnButton, Sprite& concedeButton) {
 	if (!us[select].alive) {
 		select = -1;
 	}
+	if (playerChooseFaith(rattle)) {
+		if (playerConcede(rattle)) {
+			concede = true;
+		}
+		else {
+			globalState = PGS::free;
+		}
+	}
 	if (weCanInteract(rattle)) {
-		usPossibleActions(rattle, battlefield, skipTurnButton);
+		usPossibleActions(rattle, battlefield, skipTurnButton, concedeButton);
 	}
 	if (continueAttackAnimationCondition(rattle)) {
 		us[select].attack(they[damaged], us, they);
@@ -1178,29 +1239,32 @@ void playerTurn(Clock& rattle, vector<vector<RectangleShape>>& battlefield, Spri
 	}
 	colouriseBattlefieldUs(battlefield);
 }
-void giveStats(Unit& target, string& inf) {
-	if (inf == "enemyArcher") {
-		target.ms = 3;
-		target.initiative = 2;
-		target.dmg = 3;
-		target.hpMax = 6;
-		target.hp = 6;
-		target.isRangeUnit = true;
+void giveStats(Unit& target, string& inf, string type = "", int flu = 0, int bmb =0) {
+	if (inf == "we") {
+		target.dmg = 5;
+		target.hpMax = 200;
 		target.setType(inf);
+		target.ms = 3;
+		target.hasActive = true;
+		target.active = 0;
+		target.altActive = 1;
+		target.defaultActiveCooldown = 3;
+		target.initiative = 10;
 		target.statuses = statuses;
-		target.isRangeUnit = true;
-		target.attackRange = 5;
-		Particle bul;
-		bul.txt = RectangleShape();
-		bul.txt.setFillColor(Color::Black);
-		bul.startSize = 20;
-		bul.endSize = 20;
-		bul.deltaX = 0;
-		bul.deltaY = 0;
-		target.bullet = bul;
-		return;
-	} 
-	if (inf == "enemyWizard") {
+		target.fireballNumber = bmb;
+		target.healNumber = flu;
+		target.altCooldown = 0;
+		target.defaultAltActiveCooldown = 1;
+	}
+	else if (inf == "dog") {
+		target.dmg = 2;
+		target.hpMax = 7;
+		target.setType(inf);
+		target.hasActive = false;
+		target.ms = 5;
+		target.initiative = 1000;
+		target.statuses = statuses;
+	} else if(type == "wizard") {
 		target.ms = 3;
 		target.initiative = 1;
 		target.dmg = 1;
@@ -1225,9 +1289,8 @@ void giveStats(Unit& target, string& inf) {
 		target.bullet = bul;
 		target.fireballNumber = 5;
 		target.healNumber = 0;
-		return;
 	}
-	if (inf == "enemyWarrior") {
+	else if (type == "warrior") {
 		target.dmg = 3;
 		target.hpMax = 8;
 		target.hp = 6;
@@ -1235,33 +1298,25 @@ void giveStats(Unit& target, string& inf) {
 		target.ms = 4;
 		target.initiative = 5;
 		target.statuses = statuses;
-		return;
-	}
-	if (inf == "we") {
-		target.dmg = 5;
-		target.hpMax = 200;
-		target.setType(inf);
+	} else if (type == "archer") {
 		target.ms = 3;
-		target.hasActive = true;
-		target.active = 0;
-		target.altActive = 1;
-		target.defaultActiveCooldown = 3;
-		target.initiative = 10;
-		target.statuses = statuses;
-		target.fireballNumber = 5;
-		target.healNumber = 5;
-		target.altCooldown = 0;
-		target.defaultAltActiveCooldown = 1;
-		return;
-	}
-	if (inf == "dog") {
-		target.dmg = 2;
-		target.hpMax = 7;
+		target.initiative = 2;
+		target.dmg = 3;
+		target.hpMax = 6;
+		target.hp = 6;
+		target.isRangeUnit = true;
 		target.setType(inf);
-		target.ms = 5;
-		target.initiative = 1000;
 		target.statuses = statuses;
-		return;
+		target.isRangeUnit = true;
+		target.attackRange = 5;
+		Particle bul;
+		bul.txt = RectangleShape();
+		bul.txt.setFillColor(Color::Black);
+		bul.startSize = 20;
+		bul.endSize = 20;
+		bul.deltaX = 0;
+		bul.deltaY = 0;
+		target.bullet = bul;
 	}
 	
 }
@@ -1320,60 +1375,93 @@ void buildTurnTracker(int pointer_us, int pointer_they) {
 		turnTrackerWindows[i].setPosition(pos);
 	}
 }
+//возвращает: {хп игрока, хп собаки, осталось фласок, осталось бомб, 1 если вин 0 если луз 2 если ничья}
+vector<int> letTheBattleBegin(vector<pair<string, string>> infAboutEnemys, int ushp, int doghp, int flusksm, int bombs){	
+	//vector<pair<string, string>> infAboutEnemys = {{"enemyWizard", "wizard"},{"enemyWarrior", "warrior"}, {"enemyArcher", "archer"} };//first = name, second = type
+	//int ushp = 200;
+	//int doghp = 2;
+	//int flusks = 5;
+	//int bombs = 5;
+
+	int usposx = 0, usposy = 1, dogposx = 0, dogposy = h-2;
 
 
-int main()
-{
-	int ushp = 200;
-	int doghp = 2;
-	int usposx = 1, usposy = 1, dogposx = 1, dogposy = 2;
-	vector<pair<int, int>> enemyArchersPos;
-	enemyArchersPos.push_back({10, 5});
-	enemyArchersPos.push_back({ 3, 3 });
-	vector<pair<int, int>> enemyWarriorsPos;
-	enemyWarriorsPos.push_back({ 5, 5 });
-	vector<pair<int, int>> enemyWizardPos;
-	enemyWizardPos.push_back({10, 0});
+
+	int enemyNumber = int(infAboutEnemys.size());
+	int breakYForUnit = h / (enemyNumber + 1);
+	int nowYForUnit = breakYForUnit;
 
 	textures["background"] = Texture();
 	textures["we"] = Texture();
 	textures["healButton"] = Texture();
 	textures["fireballButton"] = Texture();
-	textures["weStep1"] = Texture();
-	textures["weStep2"] = Texture();
 	textures["dog"] = Texture();
-	textures["enemyWarrior"] = Texture();
-	textures["enemyArcher"] = Texture();
-	textures["enemyWizard"] = Texture();
-	textures["fireball"] = Texture();
 	textures["skipTurn"] = Texture();
 	textures["active"] = Texture();
-	if (!textures["background"].loadFromFile("imgs/background.jpg") || !textures["we"].loadFromFile("imgs/we.png") || !textures["weStep1"].loadFromFile("imgs/weStep1.png") || !textures["weStep2"].loadFromFile("imgs/weStep2.png")) {
-		return EXIT_FAILURE;
+	textures["concedeButton"] = Texture();
+	textures["yesButton"] = Texture();
+	textures["noButton"] = Texture();
+	
+	if (!textures["background"].loadFromFile("imgs/background.jpg") || !textures["we"].loadFromFile("imgs/we.png") || !textures["healButton"].loadFromFile("imgs/healButton.png")) {
+		return vector<int>(0);
 	}
-	if (!textures["dog"].loadFromFile("imgs/dog.png") || !textures["enemyWarrior"].loadFromFile("imgs/enemyWarrior.png") || !textures["enemyArcher"].loadFromFile("imgs/enemyArcher.png")) {
-		return EXIT_FAILURE;
+	if (!textures["fireballButton"].loadFromFile("imgs/fireballButton.png") || !textures["concedeButton"].loadFromFile("imgs/concedeButton.png")) {
+		return vector<int>(0);
 	}
-	if (!textures["enemyWizard"].loadFromFile("imgs/enemyWizard.png") || !textures["fireball"].loadFromFile("imgs/fireball.png")) {
-		return EXIT_FAILURE;
+	if (!textures["active"].loadFromFile("imgs/activeTexture.png") || !textures["skipTurn"].loadFromFile("imgs/skipTurnTexture.png") || !textures["dog"].loadFromFile("imgs/dog.png")) {
+		return vector<int>(0);
 	}
-	if (!textures["active"].loadFromFile("imgs/activeTexture.png") || !textures["skipTurn"].loadFromFile("imgs/skipTurnTexture.png")) {
-		return EXIT_FAILURE;
+	if (!textures["yesButton"].loadFromFile("imgs/yesButton.png") || !textures["noButton"].loadFromFile("imgs/noButton.png")) {
+		return vector<int>(0);
 	}
-	if (!textures["healButton"].loadFromFile("imgs/healButton.png") || !textures["fireballButton"].loadFromFile("imgs/fireballButton.png")) {
-		return EXIT_FAILURE;
-	}
-
-
 
 	Font main_font;
-	if (!main_font.loadFromFile("mainFont.ttf")) return EXIT_FAILURE;
+	if (!main_font.loadFromFile("mainFont.ttf")) return vector<int>(0);
+
+	crossroads = ConcedeMenu(main_font);
+
+	ActiveAbility heal;
+	heal.name = "Heal";
+	ActiveAbility fireball;
+	fireball.name = "Fireball";
+	actives.push_back(fireball);
+	actives[0].range = 5;
+	actives[0].addedStatus = {};
+	actives[0].removedStatus = {};
+	actives[0].target = "earth";
+	actives[0].hpChange = 20;
+	actives[0].area = 1;
+	actives[0].id = 0;
+	actives.push_back(heal);
+	actives[1].id = 1;
+	actives[1].addedStatus = {};
+	actives[1].removedStatus = {};
+	actives[1].target = "self";
+	actives[1].hpChange = -5;
+
+	for (size_t i = 0; i < actives.size(); i++) {
+		if (actives[i].target == "earth") {
+			if (!textures[actives[i].name].loadFromFile("imgs/" + actives[i].name + ".png")) {
+				return vector<int>(0);
+			}
+		}
+	}
+	for (size_t i = 0; i < infAboutEnemys.size(); i++) {
+		if (!textures[infAboutEnemys[i].first].loadFromFile("imgs/" + infAboutEnemys[i].first + ".png")) {
+			return vector<int>(0);
+		}
+	}
+
+	
 
 	StatsTable table(main_font);
 
 	Sprite skipTurnButton;
 	skipTurnButton.setTexture(textures["skipTurn"]);
 	skipTurnButton.setPosition(Vector2f(7.f, 925.f));
+	Sprite concedeButton;
+	concedeButton.setTexture(textures["concedeButton"]);
+	concedeButton.setPosition(Vector2f(162.f, 925.f));
 	
 	Particle ballOfFire;
 	ballOfFire.deltaX = -100;
@@ -1381,24 +1469,10 @@ int main()
 	ballOfFire.startSize = 1;
 	ballOfFire.endSize = 450;
 	ballOfFire.txt = RectangleShape();
-	ballOfFire.txt.setTexture(&textures["fireball"]);
-	ActiveAbility heal;
-	heal.name = "heal";
-	heal.id = 1;
-	heal.addedStatus = {};
-	heal.removedStatus = {};
-	heal.target = "self";
-	heal.hpChange = -5;
-	ActiveAbility fireball;
-	fireball.name = "Fireball";
-	fireball.txt = ballOfFire;
-	fireball.range = 5;
-	fireball.addedStatus = {};
-	fireball.removedStatus = {};
-	fireball.target = "earth";
-	fireball.hpChange = 20;
-	fireball.area = 1;
-	fireball.id = 0;
+	ballOfFire.txt.setTexture(&textures["Fireball"]);
+	
+	actives[0].txt = ballOfFire;
+	
 	StatBlock URPOISONED;
 	URPOISONED.tickdmg = 3;
 	Passive poisoned;
@@ -1435,8 +1509,19 @@ int main()
 	statuses.push_back(poison_touch);
 	statuses.push_back(running);
 	statuses.push_back(runrunrun);
-	actives.push_back(fireball);
-	actives.push_back(heal);
+
+
+	Unit scytheofvyse;
+	for (size_t i = 0; i < infAboutEnemys.size(); i++) {
+		while (nowYForUnit >= h) {
+			nowYForUnit--;
+		}
+		scytheofvyse = Unit(10, nowYForUnit);
+		giveStats(scytheofvyse, infAboutEnemys[i].first, infAboutEnemys[i].second);
+		scytheofvyse.statuses = statuses;
+		they.push_back(scytheofvyse);
+		nowYForUnit += breakYForUnit;
+	}
 
 	//srand(time(nullptr));//задаём сид для генерации случайных чисел (что это и почему это желательно сделать можно почитать на cppreferences)
 
@@ -1450,16 +1535,16 @@ int main()
 	vector<vector<RectangleShape>> battlefield(h, vector<RectangleShape>(w));
 	for (int i = 0; i < h; i++) {
 		for (int j = 0; j < w; j++) {
-			RectangleShape scytheofvyse(Vector2f(150.f, 150.f));
-			scytheofvyse.setOutlineColor(Color::Blue);
-			scytheofvyse.setOutlineThickness(2.f);
-			scytheofvyse.setFillColor(Color::Transparent);
-			scytheofvyse.move(j * 150.f + 135.f, i * 150.f + 5);
-			battlefield[i][j] = scytheofvyse;
+			RectangleShape hex(Vector2f(150.f, 150.f));
+			hex.setOutlineColor(Color::Blue);
+			hex.setOutlineThickness(2.f);
+			hex.setFillColor(Color::Transparent);
+			hex.move(j * 150.f + 135.f, i * 150.f + 5);
+			battlefield[i][j] = hex;
 		}
 	}
 
-	Unit scytheofvyse(dogposx,dogposy);
+	scytheofvyse = Unit(dogposx,dogposy);
 	scytheofvyse.hp = doghp;
 	string mysticStaff = "dog";
 	giveStats(scytheofvyse, mysticStaff);
@@ -1471,32 +1556,9 @@ int main()
 	scytheofvyse = Unit(usposx, usposy);
 	scytheofvyse.hp = ushp;
 	mysticStaff = "we";
-	giveStats(scytheofvyse, mysticStaff);
+	giveStats(scytheofvyse, mysticStaff, "", 5, 5);
 	scytheofvyse.statuses = statuses;
 	us.push_back(scytheofvyse);
-
-
-	for (size_t i = 0; i < enemyArchersPos.size(); i++) {
-		scytheofvyse = Unit(enemyArchersPos[i].first, enemyArchersPos[i].second);
-		mysticStaff = "enemyArcher";
-		giveStats(scytheofvyse, mysticStaff);
-		scytheofvyse.statuses = statuses;
-		they.push_back(scytheofvyse);
-	}
-	for (size_t i = 0; i < enemyWizardPos.size(); i++) {
-		scytheofvyse = Unit(enemyWizardPos[i].first, enemyWizardPos[i].second);
-		mysticStaff = "enemyWizard";
-		giveStats(scytheofvyse, mysticStaff);
-		scytheofvyse.statuses = statuses;
-		they.push_back(scytheofvyse);
-	}
-	for (size_t i = 0; i < enemyWarriorsPos.size(); i++) {
-		scytheofvyse = Unit(enemyWarriorsPos[i].first, enemyWarriorsPos[i].second);
-		mysticStaff = "enemyWarrior";
-		giveStats(scytheofvyse, mysticStaff);
-		scytheofvyse.statuses = statuses;
-		they.push_back(scytheofvyse);
-	}
 
 	sort(us.begin(), us.end());
 	sort(they.begin(), they.end());
@@ -1515,7 +1577,7 @@ int main()
 			}
 		}
 		if (somebodyWin(window)) {
-			window.close();
+			return answer;
 			break;
 		}
 		if (select == -1) {
@@ -1528,7 +1590,7 @@ int main()
 			botTurn(rattle, battlefield);
 		}
 		else {
-			playerTurn(rattle, battlefield, skipTurnButton);
+			playerTurn(rattle, battlefield, skipTurnButton, concedeButton);
 
 			if (select != -1 && us[select].skippedTurnThisRound) {
 				skipTurnButton.setColor(Color(0, 0, 0, 255));
@@ -1576,6 +1638,15 @@ int main()
 				table.draw(they[i], window);
 			}
 		}
+		window.draw(concedeButton);
+		if (globalState == PGS::conceding) {
+			crossroads.draw(window);
+		}
 		window.display();
 	}
+	return vector<int>(0);
+}
+int main() {
+	letTheBattleBegin({ {"enemyWizard", "wizard"},{"enemyWarrior", "warrior"}, {"enemyArcher", "archer"} }, 200, 2, 5, 5);
+	//(vector<pair<string, string>> infAboutEnemys, int ushp, int doghp, int flusksm, int bombs)
 }
